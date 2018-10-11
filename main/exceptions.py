@@ -1,0 +1,2 @@
+class UrlSpaceExhaust(Exception):
+    pass
