@@ -3,6 +3,7 @@ from django.conf import settings
 from django.shortcuts import get_object_or_404
 
 from .shorter import shorter_runner
+from .utils import need_password, UrlEnum
 
 
 class BaseUrl(models.Model):
@@ -16,7 +17,7 @@ class BaseUrl(models.Model):
     created_time = models.DateTimeField(auto_now_add=True)
 
     # 用户自定义的字段
-    expired_time = models.DateTimeField(null=True, blank=True)
+    expired_time = models.IntegerField(null=True, blank=True)  # 存放timestamp
     password = models.CharField(null=True, blank=True, max_length=16)
 
     class Meta:
@@ -26,20 +27,22 @@ class BaseUrl(models.Model):
 
 class Url(BaseUrl):
     @classmethod
-    def to_short_url(cls, url, digit=getattr(settings, 'DEFAULT_URL_DIGIT', 4), expiredTime=None, password=None):
+    def to_short_url(cls, url=None, digit=getattr(settings, 'DEFAULT_URL_DIGIT', 4), short_url=None, expired_time=None,
+                     password=None):
         """
         根据给定的原 url 和用户定义的参数，生成短url。
 
         :param url: 要转换为短链的原始url
         :param digit: 转换的短网址字符数
+        :param short_url: 指定要使用的short_url
         :param expiredTime: 短链过期时间
         :param password:访问短链的密码
         :return: 短网址
         """
-        return shorter_runner(cls, url, digit, expiredTime=expiredTime, password=password)
+        return shorter_runner(cls, url, digit, short_url=short_url, expiredTime=expired_time, password=password)
 
     @classmethod
-    def to_origin_url(cls, short_url):
+    def to_origin_url_obj(cls, short_url, password=None):
         """
         根据给定的短网址查找原 url
 
@@ -47,7 +50,30 @@ class Url(BaseUrl):
         :return:
         """
         url_obj = get_object_or_404(cls, short_url=short_url)
-        return url_obj.url
+        need_password(url_obj, password)
+        return url_obj
+
+    @classmethod
+    def save_short_url(cls, data):
+        """
+        根据传入的参数存入短链
+
+        :param data: 参数参数的字典
+        :return: 生成 url 的状态
+        """
+        short_url_status = cls.to_short_url(**data)
+
+        if short_url_status[1] == UrlEnum.NEW_SHORT_URL:
+            data['short_url'] = short_url_status[0]
+            try:
+                data.pop('digit')
+            except KeyError:
+                pass
+            finally:
+                url = Url(**data)
+                url.save()
+
+        return short_url_status
 
 
 class ExpiredUrl(BaseUrl):
