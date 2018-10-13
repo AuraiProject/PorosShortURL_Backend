@@ -4,7 +4,7 @@ from .exceptions import NeedPassword
 
 
 class UrlEnum(Enum):
-    EXIST_COMMON_URL = 'EXIST_COMMON_URL'
+    EXIST_URL = 'EXIST_URL'
     NEW_SHORT_URL = 'NEW_SHORT_URL'
 
 
