@@ -1,4 +1,5 @@
 from functools import wraps
+from copy import copy
 
 from rest_framework.response import Response
 from django.http import JsonResponse
@@ -58,8 +59,10 @@ def api_data_validate(serializer):
                 request.validate_data = serializer_data.data
                 return func(request, *args, **kwargs)
             else:
+                content = copy(BadParams.content)
+                content.update(serializer_data.errors)
                 return Response(
-                    BadParams.content,
+                    content,
                     status=BadParams.api_status
                 )
 

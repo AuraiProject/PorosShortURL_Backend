@@ -19,10 +19,10 @@ class BaseUrl(models.Model):
     """
     url = models.URLField(db_index=True)
     short_url = models.CharField(unique=True, db_index=True, max_length=255)
-    created_time = models.DateTimeField(auto_now_add=True)
+    created_time = models.IntegerField()  # timestamp
 
     # 用户自定义的字段
-    expired_time = models.IntegerField(null=True, blank=True)  # 存放timestamp
+    expired_time = models.IntegerField(null=True, blank=True)  # timestamp
     password = models.CharField(null=True, blank=True, max_length=16)
 
     class Meta:
@@ -68,6 +68,7 @@ class Url(BaseUrl):
             ExpiredUrl(**expired_url_fields_dict).save()
             expired_url_cls.delete()
 
+        self.created_time = datetime.timestamp(datetime.now())
         return super().save()
 
     @classmethod
