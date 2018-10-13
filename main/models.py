@@ -29,6 +29,9 @@ class BaseUrl(models.Model):
         abstract = True
         ordering = ('-created_timestamp', 'short_url')
 
+    def __str__(self):
+        return f"{self.__class__.__name__}(url='{self.url}', short_url='{self.short_url}', ...)"
+
 
 class FilterExpiredUrlManager(models.Manager):
     """
@@ -74,7 +77,7 @@ class Url(BaseUrl):
     @classmethod
     def to_short_url(cls, url=None, digit=getattr(settings, 'DEFAULT_URL_DIGIT', 4), short_url=None,
                      expired_timestamp=None,
-                     password=None):
+                     password=None, **kwargs):
         """
         根据给定的原 url 和用户定义的参数，生成短url。
 

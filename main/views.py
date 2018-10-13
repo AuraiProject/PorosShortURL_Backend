@@ -1,6 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404
 
 from .serializers import UrlSerializer, ShortUrlSerializer
 from .models import Url
@@ -16,8 +17,9 @@ from .decorators import protect_url_space_exhaust, url_need_password_with_api, u
 def long_to_short(request):
     data = request.validate_data
     short_url_status = Url.save_short_url(data)
-    data['short_url'] = get_full_short_url(request, short_url_status[0])
-    return Response(data)
+    url_cls = get_object_or_404(Url, short_url=short_url_status[0])
+    url_cls.short_url = get_full_short_url(request, url_cls.short_url)
+    return Response(UrlSerializer(url_cls).data)
 
 
 @api_view(['POST'])
