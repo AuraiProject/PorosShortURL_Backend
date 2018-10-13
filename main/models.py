@@ -1,6 +1,11 @@
+from datetime import datetime
+import json
+
 from django.db import models
+from django.db.models import Q
 from django.conf import settings
 from django.shortcuts import get_object_or_404
+from django.core import serializers
 
 from .shorter import shorter_runner
 from .utils import need_password, UrlEnum
@@ -25,7 +30,46 @@ class BaseUrl(models.Model):
         ordering = ('-created_time', 'short_url')
 
 
+class FilterExpiredUrlManager(models.Manager):
+    """
+    从 queryset 中过滤过期的 url 记录。
+    为了避免数据库竟态，只在查询时做过滤，不实际迁移。
+    """
+
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            Q(expired_time__gte=datetime.timestamp(datetime.now())) |
+            Q(expired_time__isnull=True)
+        )
+
+
 class Url(BaseUrl):
+    """
+    当前有效的 Url 记录.
+    """
+
+    objects = FilterExpiredUrlManager()
+
+    def save(self, *args, **kwargs):
+        """
+        因为 FilterExpiredUrlManager 过滤了过期的记录，因此，即使 filter 不到某条指定 short_url 的记录，
+        该记录也可能以过期 url 的记录存在于表中。所以保存时需要将此过期的 url 记录迁移到 ExpiredUrl 表，以保存新记录.
+
+        因为只有在访问到某个过期记录的时候才会清理，为了防止某些久不被访问的过期记录一直占用空间，仍需要定期
+        执行额外的清理任务。
+        """
+        try:
+            expired_url_cls = self.__class__._base_manager.get(short_url=self.short_url)
+        except self.__class__.DoesNotExist:
+            pass
+        else:
+            expired_url_fields_json = serializers.serialize('json', [expired_url_cls])
+            expired_url_fields_dict = json.loads(expired_url_fields_json)[0]['fields']
+            ExpiredUrl(**expired_url_fields_dict).save()
+            expired_url_cls.delete()
+
+        return super().save()
+
     @classmethod
     def to_short_url(cls, url=None, digit=getattr(settings, 'DEFAULT_URL_DIGIT', 4), short_url=None, expired_time=None,
                      password=None):

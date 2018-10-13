@@ -11,7 +11,7 @@ from .utils import UrlEnum
 URL_CHAR_TABLE = string.ascii_letters + string.digits
 
 
-class HashQueryShorter:
+class BaseShorter:
     @staticmethod
     def specify_url(url_cls, short_url):
         try:
@@ -39,6 +39,11 @@ class HashQueryShorter:
 
         return None
 
+    def generate(self, *args, **kwargs):
+        raise NotImplementedError()
+
+
+class HashQueryShorter(BaseShorter):
     @classmethod
     def generate(cls, url_cls, url, digit, **params):
         short_url = params.get('short_url')

@@ -15,7 +15,7 @@ def need_password(url, password):
         raise NeedPassword()
 
 
-def get_full_short_url(request, short):
+def get_full_short_url(request, short_code):
     return request.scheme + '://' \
            + request.META['HTTP_HOST'] + '/' \
-           + short
+           + short_code
