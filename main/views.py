@@ -6,10 +6,11 @@ from .serializers import UrlSerializer, ShortUrlSerializer
 from .models import Url
 from .utils import get_full_short_url
 from .decorators import protect_url_space_exhaust, url_need_password_with_api, url_need_password_with_view, \
-    api_data_validate
+    api_data_validate, protect_url_has_been_used
 
 
 @api_view(['POST'])
+@protect_url_has_been_used
 @protect_url_space_exhaust
 @api_data_validate(UrlSerializer)
 def long_to_short(request):

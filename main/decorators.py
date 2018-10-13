@@ -1,10 +1,9 @@
 from functools import wraps
 
 from rest_framework.response import Response
-from rest_framework import status
 from django.http import JsonResponse
 
-from .exceptions import UrlSpaceExhaust, NeedPassword, BadParams
+from .exceptions import UrlSpaceExhaust, NeedPassword, BadParams, UrlHasBeenUsed
 
 
 def _short_url_exception_decorator(exception, res):
@@ -35,6 +34,11 @@ def need_password_view_res():
 protect_url_space_exhaust = _short_url_exception_decorator(UrlSpaceExhaust, lambda: Response(
     UrlSpaceExhaust.content,
     UrlSpaceExhaust.api_status
+))
+
+protect_url_has_been_used = _short_url_exception_decorator(UrlHasBeenUsed, lambda: Response(
+    UrlHasBeenUsed.content,
+    UrlHasBeenUsed.api_status
 ))
 
 url_need_password_with_api = _short_url_exception_decorator(NeedPassword, lambda: Response(
