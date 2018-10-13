@@ -19,15 +19,15 @@ class BaseUrl(models.Model):
     """
     url = models.URLField(db_index=True)
     short_url = models.CharField(unique=True, db_index=True, max_length=255)
-    created_time = models.IntegerField()  # timestamp
+    created_timestamp = models.IntegerField()  # timestamp
 
     # 用户自定义的字段
-    expired_time = models.IntegerField(null=True, blank=True)  # timestamp
+    expired_timestamp = models.IntegerField(null=True, blank=True)  # timestamp
     password = models.CharField(null=True, blank=True, max_length=16)
 
     class Meta:
         abstract = True
-        ordering = ('-created_time', 'short_url')
+        ordering = ('-created_timestamp', 'short_url')
 
 
 class FilterExpiredUrlManager(models.Manager):
@@ -38,8 +38,8 @@ class FilterExpiredUrlManager(models.Manager):
 
     def get_queryset(self):
         return super().get_queryset().filter(
-            Q(expired_time__gte=datetime.timestamp(datetime.now())) |
-            Q(expired_time__isnull=True)
+            Q(expired_timestamp__gte=datetime.timestamp(datetime.now())) |
+            Q(expired_timestamp__isnull=True)
         )
 
 
@@ -68,11 +68,12 @@ class Url(BaseUrl):
             ExpiredUrl(**expired_url_fields_dict).save()
             expired_url_cls.delete()
 
-        self.created_time = datetime.timestamp(datetime.now())
+        self.created_timestamp = datetime.timestamp(datetime.now())
         return super().save()
 
     @classmethod
-    def to_short_url(cls, url=None, digit=getattr(settings, 'DEFAULT_URL_DIGIT', 4), short_url=None, expired_time=None,
+    def to_short_url(cls, url=None, digit=getattr(settings, 'DEFAULT_URL_DIGIT', 4), short_url=None,
+                     expired_timestamp=None,
                      password=None):
         """
         根据给定的原 url 和用户定义的参数，生成短url。
@@ -84,7 +85,8 @@ class Url(BaseUrl):
         :param password:访问短链的密码
         :return: 短网址
         """
-        return shorter_runner(cls, url, digit, short_url=short_url, expiredTime=expired_time, password=password)
+        return shorter_runner(cls, url, digit, short_url=short_url, expired_timestamp=expired_timestamp,
+                              password=password)
 
     @classmethod
     def to_origin_url_obj(cls, short_url, password=None):
