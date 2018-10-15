@@ -1,4 +1,4 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import APIView
 from rest_framework.response import Response
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -10,29 +10,30 @@ from .decorators import protect_url_space_exhaust, url_need_password_with_api, u
     api_data_validate, protect_url_has_been_used
 
 
-@api_view(['POST'])
-@protect_url_has_been_used
-@protect_url_space_exhaust
-@api_data_validate(UrlSerializer)
-def long_to_short(request):
-    data = request.validate_data
-    short_url_status = Url.save_short_url(data)
-    url_cls = get_object_or_404(Url, short_url=short_url_status[0])
-    url_cls.short_url = get_full_short_url(request, url_cls.short_url)
-    return Response(UrlSerializer(url_cls).data)
+class UrlView(APIView):
+    @url_need_password_with_api
+    @api_data_validate(ShortUrlSerializer)
+    def get(self, request):
+        """
+        从一个短网址得到完整网址
+        """
+        data = request.validate_data
+        url_obj = Url.to_origin_url_obj(data['short_url'].split('/')[-1], data.get('password'))
+        url_obj.short_url = get_full_short_url(request, url_obj.short_url)
+        return Response(UrlSerializer(url_obj).data)
 
-
-@api_view(['POST'])
-@url_need_password_with_api
-@api_data_validate(ShortUrlSerializer)
-def short_to_long(request):
-    data = request.validate_data
-    url_obj = Url.to_origin_url_obj(data['short_url'].split('/')[-1], data.get('password'))
-    url_obj.short_url = get_full_short_url(request, url_obj.short_url)
-    url_serialization = UrlSerializer(url_obj)
-    return Response(
-        url_serialization.data
-    )
+    @protect_url_has_been_used
+    @protect_url_space_exhaust
+    @api_data_validate(UrlSerializer)
+    def post(self, request):
+        """
+        根据原网址创建一个新短网址
+        """
+        data = request.validate_data
+        short_url_status = Url.save_short_url(data)
+        url_obj = get_object_or_404(Url, short_url=short_url_status[0])
+        url_obj.short_url = get_full_short_url(request, url_obj.short_url)
+        return Response(UrlSerializer(url_obj).data)
 
 
 @url_need_password_with_view

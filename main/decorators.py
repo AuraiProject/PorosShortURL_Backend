@@ -53,11 +53,11 @@ url_need_password_with_view = _short_url_exception_decorator(NeedPassword, need_
 def api_data_validate(serializer):
     def decorator(func):
         @wraps(func)
-        def inner(request, *args, **kwargs):
+        def inner(self, request, *args, **kwargs):
             serializer_data = serializer(data=request.data)
             if serializer_data.is_valid():
                 request.validate_data = serializer_data.data
-                return func(request, *args, **kwargs)
+                return func(self, request, *args, **kwargs)
             else:
                 content = copy(BadParams.content)
                 content.update(serializer_data.errors)
