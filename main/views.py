@@ -1,7 +1,7 @@
 from rest_framework.decorators import APIView
 from rest_framework.response import Response
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 
 from .serializers import UrlSerializer, ShortUrlSerializer
 from .models import Url
@@ -40,3 +40,11 @@ class UrlView(APIView):
 def redirect_url(request, short_url):
     url_obj = Url.to_origin_url_obj(short_url, request.POST.get('password'))
     return HttpResponseRedirect(url_obj.url)
+
+
+def react_app(request):
+    return render(request, 'index.html')
+
+
+def handler404(request, *args, **kwargs):
+    return render(request, 'index.html')

@@ -109,3 +109,8 @@ venv.bak/
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+PorosShortURL_Frontend
+static
+!static/favicon.ico
+templates/index.html
