@@ -47,4 +47,6 @@ def react_app(request):
 
 
 def handler404(request, *args, **kwargs):
-    return render(request, 'index.html')
+    res = render(request, 'index.html')
+    res.status_code = 404
+    return res
