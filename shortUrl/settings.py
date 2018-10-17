@@ -24,7 +24,7 @@ SECRET_KEY = 'fgb-mr&t1^v_$s$=k_m9v8*1!w58-$fsn$0k%-)^)sdyqr#*-7'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['127.0.0.1', ]
+ALLOWED_HOSTS = ['0.0.0.0', ]
 
 # Application definition
 
