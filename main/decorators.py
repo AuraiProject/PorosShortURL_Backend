@@ -2,7 +2,7 @@ from functools import wraps
 from copy import copy
 
 from rest_framework.response import Response
-from django.http import JsonResponse
+from django.http import HttpResponseRedirect
 
 from .exceptions import UrlSpaceExhaust, NeedPassword, BadParams, UrlHasBeenUsed
 
@@ -13,8 +13,8 @@ def _short_url_exception_decorator(exception, res):
         def inner(*args, **kwargs):
             try:
                 result = func(*args, **kwargs)
-            except exception:
-                return res()
+            except exception as e:
+                return res(e)
             else:
                 return result
 
@@ -23,26 +23,21 @@ def _short_url_exception_decorator(exception, res):
     return decorator
 
 
-def need_password_view_res():
-    # todo:应该重定向输入密码的页面
-    res = JsonResponse(
-        NeedPassword.content,
-    )
-    res.status_code = NeedPassword.code
-    return res
+def need_password_view_res(e):
+    return HttpResponseRedirect('/check?short_url=' + e.args[0])
 
 
-protect_url_space_exhaust = _short_url_exception_decorator(UrlSpaceExhaust, lambda: Response(
+protect_url_space_exhaust = _short_url_exception_decorator(UrlSpaceExhaust, lambda e: Response(
     UrlSpaceExhaust.content,
     UrlSpaceExhaust.api_status
 ))
 
-protect_url_has_been_used = _short_url_exception_decorator(UrlHasBeenUsed, lambda: Response(
+protect_url_has_been_used = _short_url_exception_decorator(UrlHasBeenUsed, lambda e: Response(
     UrlHasBeenUsed.content,
     UrlHasBeenUsed.api_status
 ))
 
-url_need_password_with_api = _short_url_exception_decorator(NeedPassword, lambda: Response(
+url_need_password_with_api = _short_url_exception_decorator(NeedPassword, lambda e: Response(
     NeedPassword.content,
     NeedPassword.api_status
 ))
@@ -50,11 +45,12 @@ url_need_password_with_api = _short_url_exception_decorator(NeedPassword, lambda
 url_need_password_with_view = _short_url_exception_decorator(NeedPassword, need_password_view_res)
 
 
-def api_data_validate(serializer):
+def api_data_validate(serializer, inBody=True):
     def decorator(func):
         @wraps(func)
         def inner(self, request, *args, **kwargs):
-            serializer_data = serializer(data=request.data)
+            data = request.data if inBody else request.query_params
+            serializer_data = serializer(data=data)
             if serializer_data.is_valid():
                 request.validate_data = serializer_data.data
                 return func(self, request, *args, **kwargs)

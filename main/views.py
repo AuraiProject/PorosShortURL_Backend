@@ -5,21 +5,23 @@ from django.shortcuts import get_object_or_404, render
 
 from .serializers import UrlSerializer, ShortUrlSerializer
 from .models import Url
-from .utils import get_full_short_url
+from .utils import get_full_short_url, get_password_from_request
 from .decorators import protect_url_space_exhaust, url_need_password_with_api, url_need_password_with_view, \
     api_data_validate, protect_url_has_been_used
 
 
 class UrlView(APIView):
     @url_need_password_with_api
-    @api_data_validate(ShortUrlSerializer)
+    @api_data_validate(ShortUrlSerializer, inBody=False)
     def get(self, request):
         """
         从一个短网址得到完整网址
         """
         data = request.validate_data
-        url_obj = Url.to_origin_url_obj(data['short_url'].split('/')[-1], data.get('password'))
+        password = get_password_from_request(request)
+        url_obj = Url.to_origin_url_obj(data['short_url'].split('/')[-1], password)
         url_obj.short_url = get_full_short_url(request, url_obj.short_url)
+        url_obj.password = None
         return Response(UrlSerializer(url_obj).data)
 
     @protect_url_has_been_used
@@ -33,12 +35,14 @@ class UrlView(APIView):
         short_url_status = Url.save_short_url(data)
         url_obj = get_object_or_404(Url, short_url=short_url_status[0])
         url_obj.short_url = get_full_short_url(request, url_obj.short_url)
+        url_obj.password = None
         return Response(UrlSerializer(url_obj).data)
 
 
 @url_need_password_with_view
 def redirect_url(request, short_url):
-    url_obj = Url.to_origin_url_obj(short_url, request.POST.get('password'))
+    password = get_password_from_request(request)
+    url_obj = Url.to_origin_url_obj(short_url, password)
     return HttpResponseRedirect(url_obj.url)
 
 
@@ -47,6 +51,4 @@ def react_app(request):
 
 
 def handler404(request, *args, **kwargs):
-    res = render(request, 'index.html')
-    res.status_code = 404
-    return res
+    return render(request, 'index.html')
