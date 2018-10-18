@@ -22,6 +22,9 @@ def validate_specify_short_url(value):
     if len(value) < 3 or len(value) > 7:
         raise serializers.ValidationError("Specify url’s length must be 4~7.")
 
+    if not value.isalnum():
+        raise serializers.ValidationError("Specify url can only have number and letter.")
+
 
 class UrlSerializer(serializers.Serializer):
     url = serializers.URLField(max_length=255, required=True)
