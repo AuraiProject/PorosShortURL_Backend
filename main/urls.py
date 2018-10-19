@@ -1,7 +1,7 @@
 from django.urls import path, re_path
 
 from .views import UrlView, redirect_url, react_app
-from .danger import DANGER_PATH
+from .utils import DANGER_PATH
 
 
 def make_urlpatterns_safe(urlpatterns):

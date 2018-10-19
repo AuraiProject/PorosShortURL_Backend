@@ -9,6 +9,8 @@ from django.core import serializers
 
 from .shorter import shorter_runner
 from .utils import need_password, UrlEnum
+from .exceptions import UrlHasBeenUsed
+from .utils import DANGER_PATH
 
 
 class BaseUrl(models.Model):
@@ -112,6 +114,8 @@ class Url(BaseUrl):
         :return: 生成 url 的状态
         """
         short_url_status = cls.to_short_url(**data)
+        if short_url_status[0] in DANGER_PATH:
+            raise UrlHasBeenUsed
 
         if short_url_status[1] == UrlEnum.NEW_SHORT_URL:
             data['short_url'] = short_url_status[0]

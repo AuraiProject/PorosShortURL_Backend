@@ -5,8 +5,6 @@ from django.shortcuts import get_object_or_404, render
 
 from .serializers import UrlSerializer, ShortUrlSerializer
 from .models import Url
-from .danger import DANGER_PATH
-from .exceptions import UrlHasBeenUsed
 from .utils import get_full_short_url, get_password_from_request
 from .decorators import protect_url_space_exhaust, url_need_password_with_api, url_need_password_with_view, \
     api_data_validate, protect_url_has_been_used
@@ -34,8 +32,6 @@ class UrlView(APIView):
         根据原网址创建一个新短网址
         """
         data = request.validate_data
-        if data['short_url'] in DANGER_PATH:
-            raise UrlHasBeenUsed
         short_url_status = Url.save_short_url(data)
         url_obj = get_object_or_404(Url, short_url=short_url_status[0])
         url_obj.short_url = get_full_short_url(request, url_obj.short_url)
