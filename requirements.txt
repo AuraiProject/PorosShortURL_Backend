@@ -1,5 +1,7 @@
 Django==2.1.2
 django-cors-headers==2.4.0
+django-redis==4.9.0
 djangorestframework==3.8.2
 pytz==2018.5
+redis==2.10.6
 whitenoise==4.1

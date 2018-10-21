@@ -2,6 +2,7 @@ from rest_framework.decorators import APIView
 from rest_framework.response import Response
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
+from django.views.decorators.cache import cache_page, cache_control
 
 from .serializers import UrlSerializer, ShortUrlSerializer
 from .models import Url
@@ -46,9 +47,13 @@ def redirect_url(request, short_url):
     return HttpResponseRedirect(url_obj.url)
 
 
+@cache_page(60 * 60)
+@cache_control(max_age=60 * 60)
 def react_app(request):
     return render(request, 'index.html')
 
 
+@cache_control(max_age=60 * 60)
+@cache_page(60 * 60)
 def handler404(request, *args, **kwargs):
     return render(request, 'index.html')

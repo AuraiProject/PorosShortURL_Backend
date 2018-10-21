@@ -11,6 +11,7 @@ from .shorter import shorter_runner
 from .utils import need_password, UrlEnum
 from .exceptions import UrlHasBeenUsed
 from .utils import DANGER_PATH
+from .cache import UrlCache
 
 
 class BaseUrl(models.Model):
@@ -94,6 +95,7 @@ class Url(BaseUrl):
                               password=password)
 
     @classmethod
+    @UrlCache.cache
     def to_origin_url_obj(cls, short_url, password=None):
         """
         根据给定的短网址查找原 url
@@ -101,6 +103,7 @@ class Url(BaseUrl):
         :param short_url:
         :return:
         """
+        print('origin')
         url_obj = get_object_or_404(cls, short_url=short_url)
         need_password(url_obj, password)
         return url_obj

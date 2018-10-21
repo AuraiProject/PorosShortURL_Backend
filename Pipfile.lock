@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "4f33938c6ff35fd3421649ea8946ca68b80b7311b20ff40c7e562047a14e1d3a"
+            "sha256": "6643c081e23683b6c4882fa0acefb3cc56dfea6bdd081cc6bb415077c0988083"
         },
         "host-environment-markers": {
             "implementation_name": "cpython",
@@ -41,12 +41,19 @@
             ],
             "version": "==2.4.0"
         },
+        "django-redis": {
+            "hashes": [
+                "sha256:a90343c33a816073b735f0bed878eaeec4f83b75fcc0dce2432189b8ea130424",
+                "sha256:15b47faef6aefaa3f47135a2aeb67372da300e4a4cf06809c66ab392686a2155"
+            ],
+            "version": "==4.9.0"
+        },
         "djangorestframework": {
             "hashes": [
-                "sha256:c375e4f95a3a64fccac412e36fb42ba36881e52313ec021ef410b40f67cddca4",
-                "sha256:b6714c3e4b0f8d524f193c91ecf5f5450092c2145439ac2769711f7eba89a9d9"
+                "sha256:63f76cbe1e7d12b94c357d7e54401103b2e52aef0f7c1650d6c820ad708776e5",
+                "sha256:607865b0bb1598b153793892101d881466bd5a991de12bd6229abb18b1c86136"
             ],
-            "version": "==3.8.2"
+            "version": "==3.9.0"
         },
         "pytz": {
             "hashes": [
@@ -54,6 +61,13 @@
                 "sha256:ffb9ef1de172603304d9d2819af6f5ece76f2e85ec10692a524dd876e72bf277"
             ],
             "version": "==2018.5"
+        },
+        "redis": {
+            "hashes": [
+                "sha256:8a1900a9f2a0a44ecf6e8b5eb3e967a9909dfed219ad66df094f27f7d6f330fb",
+                "sha256:a22ca993cea2962dbb588f9f30d0015ac4afcc45bee27d3978c0dbe9e97c6c0f"
+            ],
+            "version": "==2.10.6"
         },
         "whitenoise": {
             "hashes": [

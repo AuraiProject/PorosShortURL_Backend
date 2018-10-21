@@ -1,5 +1,6 @@
 from enum import Enum
 from base64 import b64decode
+from collections import UserDict
 import binascii
 
 from .exceptions import NeedPassword
@@ -16,6 +17,18 @@ DANGER_PATH = [
 class UrlEnum(Enum):
     EXIST_URL = 'EXIST_URL'
     NEW_SHORT_URL = 'NEW_SHORT_URL'
+
+
+class UrlStruct(UserDict):
+    """
+    将序列化的字典形式的数据，转换为可以对象方式访问的形式
+    """
+
+    def __getattr__(self, item):
+        try:
+            return self.__getitem__(item)
+        except KeyError:
+            raise AttributeError(item)
 
 
 def need_password(url, password):
