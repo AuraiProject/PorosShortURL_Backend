@@ -6,4 +6,4 @@ ready to use:
 django + django RESTframwork + redis + celery
 
 #### Other
-Frontend: https://github.com/Arianxx/PorosShortURL_Frontend
+Frontend: https://github.com/AuraiProject/PorosShortURL_Frontend

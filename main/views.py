@@ -47,8 +47,8 @@ def redirect_url(request, short_url):
     return HttpResponseRedirect(url_obj.url)
 
 
-@cache_page(60 * 60)
 @cache_control(max_age=60 * 60)
+@cache_page(60 * 60)
 def react_app(request):
     return render(request, 'index.html')
 
