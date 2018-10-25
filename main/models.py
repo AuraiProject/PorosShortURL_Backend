@@ -1,17 +1,16 @@
 from datetime import datetime
-import json
 
 from django.db import models
 from django.db.models import Q
 from django.conf import settings
 from django.shortcuts import get_object_or_404
-from django.core import serializers
 
 from .shorter import shorter_runner
 from .utils import need_password, UrlEnum
 from .exceptions import UrlHasBeenUsed
 from .utils import DANGER_PATH
 from .cache import UrlCache
+from .tasks import transfer_model_backend
 
 
 class BaseUrl(models.Model):
@@ -69,10 +68,7 @@ class Url(BaseUrl):
         except self.__class__.DoesNotExist:
             pass
         else:
-            expired_url_fields_json = serializers.serialize('json', [expired_url_cls])
-            expired_url_fields_dict = json.loads(expired_url_fields_json)[0]['fields']
-            ExpiredUrl(**expired_url_fields_dict).save()
-            expired_url_cls.delete()
+            transfer_model_backend.delay(expired_url_cls, ExpiredUrl)
 
         self.created_timestamp = datetime.timestamp(datetime.now())
         return super().save()

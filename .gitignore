@@ -114,3 +114,5 @@ PorosShortURL_Frontend
 static
 !static/favicon.ico
 templates/index.html
+celerybeat*
+dump.rdb

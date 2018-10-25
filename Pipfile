@@ -12,6 +12,7 @@ djangorestframework = "*"
 django-cors-headers = "*"
 whitenoise = "*"
 django-redis = "*"
+celery = "*"
 
 
 [dev-packages]

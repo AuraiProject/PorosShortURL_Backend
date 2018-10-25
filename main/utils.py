@@ -1,7 +1,10 @@
 from enum import Enum
 from base64 import b64decode
 from collections import UserDict
+import json
 import binascii
+
+from django.core import serializers
 
 from .exceptions import NeedPassword
 
@@ -52,3 +55,10 @@ def get_password_from_request(request):
         except binascii.Error:
             return None
     return None
+
+
+def transfer_model(origin_obj, target_model):
+    obj_fields_json = serializers.serialize('json', [origin_obj])
+    obj_fields_dict = json.loads(obj_fields_json)[0]['fields']
+    target_model(**obj_fields_dict).save()
+    origin_obj.delete()
